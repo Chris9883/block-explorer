@@ -239,7 +239,7 @@ const Address = () => {
               {totalCount == 0 ? (
                 <Container className="display-nfts">
                   <Typography variant="body1">
-                    This address doesn't own any NFTs.
+                    This address doesn&apos;t own any NFTs.
                   </Typography>
                 </Container>
               ) : (

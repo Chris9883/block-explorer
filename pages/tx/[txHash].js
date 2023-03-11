@@ -16,6 +16,7 @@ const Transaction = () => {
   const [recipient, setRecipient] = useState();
   const [value, setValue] = useState();
   const [data, setData] = useState();
+  // contract creation
   const [creates, setCreates] = useState();
   const [baseFee, setBaseFee] = useState();
   const [gasPrice, setGasPrice] = useState();
@@ -62,7 +63,7 @@ const Transaction = () => {
       }
     }
     fetch();
-  }, [txHash]);
+  }, [txHash, router]);
 
   return (
     <Box className="content">

@@ -32,7 +32,7 @@ export default function Home({ currentBlock }) {
     if (currentBlock) {
       fetchData();
     }
-  }, [currentBlock]);
+  }, [currentBlock, displayNumberOfBlocks]);
 
   return (
     <>

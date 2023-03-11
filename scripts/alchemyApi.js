@@ -217,7 +217,7 @@ async function getBlockDetails(
       setNumTransactions(blockInfo.transactions.length);
       setGasUsed(parseInt(blockInfo.gasUsed));
       setGasLimit(parseInt(blockInfo.gasLimit));
-      // unhex
+      // unhex?
       setExtraData(blockInfo.extraData.toString());
       setParentHash(blockInfo.parentHash);
       setFeeRecipient(blockInfo.miner);

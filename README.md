@@ -28,5 +28,5 @@ After cloning this repo,
 - cd into the base directory: `cd block-explorer`
 - Run `npm install` to install all the depedencies
 - Create a `.env` file by running `touch .env`
-- Sign up for a free [Alchemy API key] (https://alchemy.com/?r=DU0MzQ2NjAxNzY4N) and copypaste this line into your `.env` file: `ALCHEMY_API_KEY="<-- enter your api key -->"`, replacing `<-- enter your api key -->` with your API key
+- Sign up for a free [Alchemy API key](https://alchemy.com/?r=DU0MzQ2NjAxNzY4N) and copypaste this line into your `.env` file: `ALCHEMY_API_KEY="<-- enter your api key -->"`, replacing `<-- enter your api key -->` with your API key
 - Run `npm run dev` to start the application and open [http://localhost:3000](http://localhost:3000) in your browser
