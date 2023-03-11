@@ -1,9 +1,9 @@
 :root {
   --max-width: 1100px;
   --border-radius: 12px;
-  --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
-    'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro',
-    'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
+  --font-mono: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono",
+    "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro",
+    "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
 
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -70,6 +70,8 @@
     --callout-border-rgb: 108, 108, 108;
     --card-rgb: 100, 100, 100;
     --card-border-rgb: 200, 200, 200;
+
+    --info-text: #007fa7;
   }
 }
 
@@ -85,18 +87,11 @@ body {
   overflow-x: hidden;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+header a {
+  color: white;
 }
-
 a {
-  color: inherit;
+  color: #007fa7;
   text-decoration: none;
 }
 
@@ -104,4 +99,213 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+header {
+  width: 100vw;
+  min-height: 12vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user-input {
+  display: flex;
+  align-items: center;
+}
+
+.search-button {
+  height: inherit;
+  margin: 0;
+}
+
+.chain-info {
+  width: 100vw;
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5vw;
+  padding-inline: 5vw;
+}
+
+.chain-info p {
+  font-size: 0.8rem;
+}
+
+main {
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.title {
+  max-width: 95vw;
+  text-align: left;
+}
+
+.info-box {
+  padding-inline: 40px;
+  padding-block: 1rem;
+  max-width: 95vw;
+  overflow: scroll;
+}
+.blockinfo-container {
+  padding: 5px 0;
+  display: flex;
+  border-bottom: 1px solid rgb(202, 198, 198);
+}
+
+.blockinfo-description {
+  min-width: 150px;
+  text-align: left;
+}
+
+.blockinfo-content {
+  min-width: 400px;
+  text-align: left;
+}
+
+.success {
+  margin-inline: 20px;
+  padding-inline: 10px;
+  border-radius: 10px;
+  color: white;
+  background-color: green;
+  border: 1px solid rgb(4, 65, 4);
+}
+
+.success-text {
+  color: green;
+  font-weight: bold;
+}
+
+.copy-icon-container {
+  padding: 0;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+.copy-icon {
+  margin: 0;
+  color: black;
+}
+
+.copy-icon-container:hover > .copy-icon,
+.copy-icon-container:active > .copy-icon {
+  color: #007fa7;
+}
+
+.btn-small {
+  min-width: fit-content;
+}
+
+.content {
+  padding: 10px;
+  margin-block: 7vh;
+  width: fit-content;
+  max-width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.block-container,
+.block-skeleton {
+  margin-top: 5px;
+  padding: 8px 10px;
+}
+.logo {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  display: none;
+}
+
+@media (min-width: 675px) {
+  .logo {
+    display: block;
+  }
+}
+
+.MuiTextField-root {
+  width: 100%;
+  padding: 0;
+}
+
+.tabpanel-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: clamp(320px, 75vw, 1500px);
+  min-height: 350px;
+  max-height: 500px;
+  overflow: scroll;
+}
+
+.searchNfts,
+.searchTokens {
+  min-width: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+}
+
+.textfield-small {
+  max-width: 350px;
+}
+.display-nfts,
+.display-tokens {
+  width: 100%;
+
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nft {
+  min-width: 200px;
+}
+
+.nft-name {
+  font-size: 1rem;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.nft-details,
+.balance-description {
+  font-size: 0.9rem;
+  color: #aaa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.balance {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.account-info {
+  padding: 20px;
+  background-color: rgba(0, 127, 167, 0.1);
+  border-radius: 5%;
+}
+
+.code {
+  height: 100%;
 }
