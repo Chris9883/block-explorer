@@ -7,7 +7,6 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { getCurrentBlockNumber, getGasPrice } from "@/scripts/alchemyApi";
 
 export default function App({ Component, pageProps }) {
-  const [userInput, setUserInput] = useState();
   const [currentBlock, setCurrentBlock] = useState();
   const [gasPrice, setGasPrice] = useState();
 
@@ -73,11 +72,7 @@ export default function App({ Component, pageProps }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/browsericon.png" />
       </Head>
-      <Header
-        userInput={userInput}
-        setUserInput={setUserInput}
-        currentBlock={currentBlock}
-      />
+      <Header currentBlock={currentBlock} />
       {<ChainInfo currentBlock={currentBlock} gasPrice={gasPrice} />}
       <main>
         <Component {...pageProps} currentBlock={currentBlock} />

@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   getAccountDetails,
   getTokens,
@@ -16,41 +17,46 @@ import {
   Container,
   Paper,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   Tabs,
   TextField,
   Typography,
 } from "@mui/material";
-
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+import TabPanel from "@/components/TabPanel";
 
 const Address = () => {
   const router = useRouter();
   const { address } = router.query;
+  const dynamicRoute = useRouter().asPath;
 
   // type: eoa (externally owned account) or contract
-  const [type, setType] = useState("eoa");
+  const [type, setType] = useState();
   const [balance, setBalance] = useState();
   const [code, setCode] = useState();
-  const [outgoing, setOutgoing] = useState();
-  const [incoming, setIncoming] = useState();
-  const [tokenBalances, setTokenBalances] = useState();
+  const [outgoing, setOutgoing] = useState([]);
+  const [incoming, setIncoming] = useState([]);
+  const [tokenBalances, setTokenBalances] = useState([]);
   const [contractAddress, setContractAddress] = useState();
   const [nfts, setNfts] = useState([]);
   const [totalCount, setTotalCount] = useState();
+  const [loading, setLoading] = useState(false);
+
+  // reset state on route change
+  useEffect(() => {
+    setType();
+    setBalance();
+    setCode();
+    setOutgoing([]);
+    setIncoming([]);
+    setTokenBalances([]);
+    setContractAddress();
+    setNfts([]);
+    setTotalCount();
+  }, [dynamicRoute]);
 
   useEffect(() => {
     if (address) {
@@ -60,7 +66,8 @@ const Address = () => {
         setType,
         setCode,
         setOutgoing,
-        setIncoming
+        setIncoming,
+        setLoading
       );
     }
   }, [address]);
@@ -70,7 +77,13 @@ const Address = () => {
     if (contractAddress) {
       let trimmedInput = contractAddress.trim();
       if (trimmedInput.length == 42 && trimmedInput.startsWith("0x")) {
-        getNftsByContract(address, trimmedInput, setNfts, setTotalCount);
+        getNftsByContract(
+          address,
+          trimmedInput,
+          setNfts,
+          setTotalCount,
+          setLoading
+        );
       }
     }
   }
@@ -80,7 +93,12 @@ const Address = () => {
     if (contractAddress) {
       let trimmedInput = contractAddress.trim();
       if (trimmedInput.length == 42 && trimmedInput.startsWith("0x")) {
-        getTokensByContract(address, trimmedInput, setTokenBalances);
+        getTokensByContract(
+          address,
+          trimmedInput,
+          setTokenBalances,
+          setLoading
+        );
       }
     }
   }
@@ -88,7 +106,9 @@ const Address = () => {
   const displayNfts = nfts.map((e, i) => {
     return (
       <Card sx={{ width: 200 }} key={i} className="nft">
-        <CardMedia image={nfts[i].image} sx={{ height: 200 }}></CardMedia>
+        <Link href={`/address/${e.address}`}>
+          <CardMedia image={nfts[i].image} sx={{ height: 200 }}></CardMedia>
+        </Link>
 
         <CardContent>
           <Typography className="nft-name" variant="body1">
@@ -103,191 +123,306 @@ const Address = () => {
       </Card>
     );
   });
+
+  const displayOutgoing = outgoing.map((e, i) => {
+    return (
+      <TableRow key={i}>
+        <TableCell>
+          <Link href={`/block/${e.blockNumber}`}>
+            <Typography variant="body1" className="table-data">
+              {e.blockNumber}
+            </Typography>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <Link href={`/tx/${e.txHash}`}>
+            <Typography variant="body1" className="table-data">
+              {e.txHash}
+            </Typography>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body1" className="table-data">
+            {e.type}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Link href={`/address/${e.to}`}>
+            <Typography variant="body1" className="table-data">
+              {e.to}
+            </Typography>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body1" className="table-data">
+            {e.value}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body1" className="table-data">
+            {e.asset}
+          </Typography>
+        </TableCell>
+      </TableRow>
+    );
+  });
+
+  const displayIncoming = incoming.map((e, i) => {
+    return (
+      <TableRow key={i}>
+        <TableCell>
+          <Link href={`/block/${e.blockNumber}`}>
+            <Typography variant="body1" className="table-data">
+              {e.blockNumber}
+            </Typography>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <Link href={`/tx/${e.txHash}`}>
+            <Typography variant="body1" className="table-data">
+              {e.txHash}
+            </Typography>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body1" className="table-data">
+            {e.type}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Link href={`/address/${e.from}`}>
+            <Typography variant="body1" className="table-data">
+              {e.from}
+            </Typography>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body1" className="table-data">
+            {e.value}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body1" className="table-data">
+            {e.asset}
+          </Typography>
+        </TableCell>
+      </TableRow>
+    );
+  });
+
+  const displayTokens = tokenBalances.map((e, i) => {
+    return (
+      <TableRow key={i}>
+        {" "}
+        <TableCell>
+          <Typography variant="body1" className="table-data symbol">
+            {e.symbol}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body1" className="table-data">
+            {e.decimals == 0 ? e.balance : e.balance % e.decimals}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Link href={`/address/${e.address}`}>
+            <Typography variant="body1" className="table-data">
+              {e.address}
+            </Typography>
+          </Link>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body1" className="table-data">
+            {e.name}
+          </Typography>
+        </TableCell>
+      </TableRow>
+    );
+  });
+
   // tabs
   const [value, setValue] = useState(0);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  if (type === "eoa") {
-    return (
-      <Box className="content">
-        <Box className="title">
+  return (
+    <Box className="content">
+      <Box className="title">
+        {" "}
+        {type === "eoa" ? (
           <Typography variant="h6">Address: {address}</Typography>
-        </Box>
-        <Box mt={2}>
-          <Container className="account-info">
-            <Typography variant="body1" className="balance-description">
-              Balance:
+        ) : (
+          <Typography variant="h6">Contract: {address}</Typography>
+        )}
+      </Box>
+      <Box mt={2}>
+        <Container className="account-info">
+          <Typography variant="body1" className="balance-description">
+            Balance:
+          </Typography>
+          {balance && (
+            <Typography variant="body1" className="balance">
+              {balance} Eth
             </Typography>
-            {balance && (
-              <Typography variant="body1" className="balance">
-                {balance} Eth
-              </Typography>
-            )}
-          </Container>
-        </Box>
+          )}
+        </Container>
+      </Box>
 
-        <Paper elevation={3} className="block-container" sx={{ width: "100%" }}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              aria-label="basic tabs example"
-            >
-              <Tab label="Transactions" />
-              <Tab label="Tokens" />
-              <Tab label="NFTs" />
-            </Tabs>
-          </Box>
-          <TabPanel value={value} index={0}>
-            <Container className="tabpanel-content">Transactions</Container>
-          </TabPanel>
-          <TabPanel value={value} index={1}>
-            <Container className="tabpanel-content">
-              <Container className="searchTokens">
-                <Button
-                  className="btn-small"
-                  variant="contained"
-                  size="small"
-                  disabled
-                >
-                  Most Popular
-                </Button>
-                <Button
-                  className="btn-small"
-                  variant="contained"
-                  size="small"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    getTokens(address, setTokenBalances, setTotalCount);
-                  }}
-                >
-                  Show all tokens
-                </Button>
-                <Typography variant="body1">or</Typography>
-                <TextField
-                  className="textfield-small"
-                  id="standard-basic"
-                  label="Enter token contract address"
-                  variant="outlined"
-                  size="small"
-                  value={contractAddress}
-                  onChange={(e) => {
-                    e.preventDefault();
-                    setContractAddress(e.target.value);
-                  }}
-                />
-                <Button
-                  variant="contained"
-                  className="btn-small"
-                  size="small"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    lookupToken;
-                    setContractAddress("");
-                  }}
-                >
-                  Search
-                </Button>
-              </Container>
-              <Container className="display-tokens">
-                {" "}
-                needs some styling lol <br />
-                {JSON.stringify(tokenBalances)}
-              </Container>
+      <Paper elevation={3} className="block-container" sx={{ width: "100%" }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            aria-label="basic tabs example"
+          >
+            <Tab label="Outgoing transactions" />
+            <Tab label="Incoming transactions" />
+            <Tab label="Tokens" />
+            <Tab label="NFTs" />
+            {type === "contract" && <Tab label="Code" />}
+          </Tabs>
+        </Box>
+        <TabPanel value={value} index={0}>
+          <Container className="tabpanel-content">
+            <Table>
+              <TableHead>
+                <TableCell className="table-header">Block</TableCell>
+                <TableCell className="table-header">Transaction Hash</TableCell>
+                <TableCell className="table-header">Type</TableCell>
+                <TableCell className="table-header">To</TableCell>
+                <TableCell className="table-header">Value</TableCell>
+                <TableCell className="table-header">Asset</TableCell>
+              </TableHead>
+              <TableBody>{displayOutgoing}</TableBody>
+            </Table>
+          </Container>
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <Container className="tabpanel-content">
+            <Table>
+              <TableHead>
+                <TableCell className="table-header">Block</TableCell>
+                <TableCell className="table-header">Transaction Hash</TableCell>
+                <TableCell className="table-header">Type</TableCell>
+                <TableCell className="table-header">From</TableCell>
+                <TableCell className="table-header">Value</TableCell>
+                <TableCell className="table-header">Asset</TableCell>
+              </TableHead>
+              <TableBody>{displayIncoming}</TableBody>
+            </Table>
+          </Container>
+        </TabPanel>
+        <TabPanel value={value} index={2}>
+          <Container className="tabpanel-content">
+            <Container className="searchTokens">
+              <Button
+                className="btn-small"
+                variant="contained"
+                size="small"
+                onClick={(e) => {
+                  e.preventDefault();
+                  getTokens(address, setTokenBalances, setTotalCount);
+                }}
+              >
+                Show all tokens
+              </Button>
+              <Typography variant="body1">or</Typography>
+              <TextField
+                className="textfield-small"
+                id="standard-basic"
+                label="Enter token contract address"
+                variant="outlined"
+                size="small"
+                value={contractAddress}
+                onChange={(e) => {
+                  e.preventDefault();
+                  setContractAddress(e.target.value);
+                }}
+              />
+              <Button
+                variant="contained"
+                className="btn-small"
+                size="small"
+                onClick={(e) => {
+                  e.preventDefault();
+                  lookupToken;
+                  setContractAddress("");
+                }}
+              >
+                Search
+              </Button>
             </Container>
-          </TabPanel>
-          <TabPanel value={value} index={2}>
-            <Container className="tabpanel-content">
-              <Container className="searchNfts">
-                <Button
-                  className="btn-small"
-                  variant="contained"
-                  onClick={() => getNfts(address, setNfts, setTotalCount)}
-                  size="small"
-                >
-                  Show all NFTs
-                </Button>
-                <Typography variant="body1">or</Typography>
-                <TextField
-                  className="textfield-small"
-                  id="standard-basic"
-                  label="Enter NFT contract address"
-                  variant="outlined"
-                  size="small"
-                  value={contractAddress}
-                  onChange={(e) => {
-                    e.preventDefault();
-                    setContractAddress(e.target.value);
-                  }}
-                />
-                <Button
-                  variant="contained"
-                  type="submit"
-                  className="btn-small"
-                  size="small"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    lookupNfts();
-                    setContractAddress("");
-                  }}
-                >
-                  Search
-                </Button>
-              </Container>
-              {totalCount == 0 ? (
-                <Container className="display-nfts">
-                  <Typography variant="body1">
-                    This address doesn&apos;t own any NFTs.
-                  </Typography>
-                </Container>
-              ) : (
-                <Container className="display-nfts">{displayNfts}</Container>
+            <Container className="display-tokens">
+              {tokenBalances[0] && (
+                <Table>
+                  <TableHead>
+                    <TableCell className="table-header symbol">
+                      Symbol
+                    </TableCell>
+                    <TableCell className="table-header">Balance</TableCell>
+                    <TableCell className="table-header">
+                      Token Address
+                    </TableCell>
+                    <TableCell className="table-header">Full Name</TableCell>
+                  </TableHead>
+                  <TableBody>{displayTokens}</TableBody>
+                </Table>
               )}
             </Container>
-          </TabPanel>
-        </Paper>
-      </Box>
-    );
-  } else if (type === "contract") {
-    return (
-      <Box className="content">
-        <Box className="title">
-          <Typography variant="h6">Contract: {address}</Typography>
-        </Box>
-        <Box mt={2}>
-          <Container className="account-info">
-            <Typography variant="body1" className="balance-description">
-              Balance:
-            </Typography>
-            {balance && (
-              <Typography variant="body1" className="balance">
-                {balance} Eth
-              </Typography>
+          </Container>
+        </TabPanel>
+        <TabPanel value={value} index={3}>
+          <Container className="tabpanel-content">
+            <Container className="searchNfts">
+              <Button
+                className="btn-small"
+                variant="contained"
+                onClick={() => getNfts(address, setNfts, setTotalCount)}
+                size="small"
+              >
+                Show all NFTs
+              </Button>
+              <Typography variant="body1">or</Typography>
+              <TextField
+                className="textfield-small"
+                id="standard-basic"
+                label="Enter NFT contract address"
+                variant="outlined"
+                size="small"
+                value={contractAddress}
+                onChange={(e) => {
+                  e.preventDefault();
+                  setContractAddress(e.target.value);
+                }}
+              />
+              <Button
+                variant="contained"
+                type="submit"
+                className="btn-small"
+                size="small"
+                onClick={(e) => {
+                  e.preventDefault();
+                  lookupNfts();
+                  setContractAddress("");
+                }}
+              >
+                Search
+              </Button>
+            </Container>
+            {totalCount == 0 ? (
+              <Container className="display-nfts">
+                <Typography variant="body1">
+                  This address doesn&apos;t own any NFTs.
+                </Typography>
+              </Container>
+            ) : (
+              <Container className="display-nfts">{displayNfts}</Container>
             )}
           </Container>
-        </Box>
-
-        <Paper elevation={3} className="block-container" sx={{ width: "100%" }}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              aria-label="basic tabs example"
-            >
-              <Tab label="Transactions" />
-              <Tab label="Internal transactions" />
-              <Tab label="Code" />
-            </Tabs>
-          </Box>
-          <TabPanel value={value} index={0}>
-            <Container className="tabpanel-content">Outgoing Tx</Container>
-          </TabPanel>
-          <TabPanel value={value} index={1}>
-            <Container className="tabpanel-content">Incoming Tx</Container>
-          </TabPanel>
-          <TabPanel value={value} index={2}>
+        </TabPanel>
+        {type === "contract" && (
+          <TabPanel value={value} index={4}>
             <Container className="tabpanel-content">
               <TextField
                 className="code"
@@ -298,10 +433,10 @@ const Address = () => {
               />
             </Container>
           </TabPanel>
-        </Paper>
-      </Box>
-    );
-  }
+        )}
+      </Paper>
+    </Box>
+  );
 };
 
 export default Address;

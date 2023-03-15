@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import { resolveEnsName } from "@/scripts/alchemyApi";
 import {
   styled,
@@ -12,6 +13,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
+// search bar styling
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -55,8 +57,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function Header({ userInput, setUserInput, currentBlock }) {
+// Header component
+export default function Header({ currentBlock }) {
   const router = useRouter();
+  const [userInput, setUserInput] = useState();
 
   async function search(e) {
     e.preventDefault();
@@ -89,7 +93,7 @@ export default function Header({ userInput, setUserInput, currentBlock }) {
           router.replace("/error");
         }
       }
-      setUserInput("");
+      setUserInput(""); // reset
     }
   }
   return (
@@ -97,7 +101,7 @@ export default function Header({ userInput, setUserInput, currentBlock }) {
       <AppBar color="primary" position="sticky">
         <Toolbar variant="regular" sx={{ justifyContent: "center" }}>
           <Link href="/" className="logo">
-            <Typography variant="h6" color="inherit" component="div">
+            <Typography variant="body1" color="inherit" component="div">
               Ethereum Block Explorer
             </Typography>
           </Link>

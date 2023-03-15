@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Inter } from "next/font/google";
 import { Box, Grid, Paper, Skeleton, Typography } from "@mui/material";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { getLatestBlocks } from "@/scripts/alchemyApi";
 import { displayUnix } from "@/scripts/utils/formatter";
 
@@ -23,11 +22,7 @@ export default function Home({ currentBlock }) {
 
   useEffect(() => {
     async function fetchData() {
-      const success = await getLatestBlocks(
-        currentBlock,
-        setLatestBlocks,
-        displayNumberOfBlocks
-      );
+      getLatestBlocks(currentBlock, setLatestBlocks, displayNumberOfBlocks);
     }
     if (currentBlock) {
       fetchData();
@@ -63,7 +58,7 @@ export default function Home({ currentBlock }) {
                         </Link>
                       </Typography>
                     </Grid>
-                    <Grid item xs={3}>
+                    <Grid item xs={3} className="mobile-hidden">
                       <Typography variant="body1">
                         {displayUnix(block.timestamp)}
                       </Typography>

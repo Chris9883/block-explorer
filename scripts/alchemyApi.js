@@ -40,10 +40,12 @@ async function getAccountDetails(
   setType,
   setCode,
   setOutgoing,
-  setIncoming
+  setIncoming,
+  setLoading
 ) {
   const amount = Utils.hexlify(20);
   try {
+    setLoading(true);
     const balance = await alchemy.core.getBalance(address);
     setBalance(Utils.formatUnits(balance, "ether"));
     const code = await alchemy.core.getCode(address);
@@ -61,8 +63,6 @@ async function getAccountDetails(
       order: "desc",
       maxCount: amount,
     });
-    console.log("outgoing", outgoingTx);
-    console.log("incoming", incomingTx);
     if (code == "0x") {
       setType("eoa");
     } else {
@@ -83,7 +83,6 @@ async function getAccountDetails(
         outgoings.push(outgoing);
       }
       setOutgoing(outgoings);
-      console.log("formatted out", outgoings);
     }
     if (incomingTx) {
       let incomings = [];
@@ -99,10 +98,10 @@ async function getAccountDetails(
         incomings.push(incoming);
       }
       setIncoming(incomings);
-      console.log("formatted in", incomings);
+      setLoading(false);
     }
   } catch (e) {
-    handleError(e);
+    handleError(e, setLoading);
   }
 }
 
@@ -130,7 +129,6 @@ async function getTransactionDetails(
 ) {
   if (txHash) {
     try {
-      console.log("looking up details for transaction", txHash);
       const data = await alchemy.core.getTransaction(txHash);
       if (!data) {
         return false;
@@ -197,14 +195,13 @@ async function getBlockDetails(
   setBaseFeePerGas,
   setExtraData,
   setParentHash,
-  setNumTransactions
+  setTransactions
 ) {
   if (blockNumberOrHash) {
     let input = blockNumberOrHash;
     if (!input.startsWith("0x")) {
       input = parseInt(blockNumberOrHash);
     }
-    console.log("input", input, "typeof", typeof input);
     try {
       // status, blockreward, totalDifficulty, Blocksize, BurntFees, StateRoot, contractInternaltx, BaseFeePerGas missing
       const blockInfo = await alchemy.core.getBlock(input);
@@ -214,7 +211,7 @@ async function getBlockDetails(
       setBlockNumber(blockInfo.number);
       setBlockhash(blockInfo.hash);
       setTimestamp(blockInfo.timestamp);
-      setNumTransactions(blockInfo.transactions.length);
+      setTransactions(blockInfo.transactions);
       setGasUsed(parseInt(blockInfo.gasUsed));
       setGasLimit(parseInt(blockInfo.gasLimit));
       // unhex?
@@ -223,13 +220,8 @@ async function getBlockDetails(
       setFeeRecipient(blockInfo.miner);
       return true;
     } catch (e) {
-      if (e.message.includes("invalid")) {
-        console.log("ERROR INVALID INPUT");
-        return false;
-      } else {
-        handleError(e);
-        return true;
-      }
+      handleError(e);
+      return true;
     }
   }
 }
@@ -271,6 +263,7 @@ async function getTokens(address, setTokenBalances, setTotalCount) {
       const nonZeroBalances = data.tokenBalances.filter((token) => {
         return parseInt(token.tokenBalance) != "0";
       });
+      setTotalCount(nonZeroBalances);
       for (const tokenBalance of nonZeroBalances) {
         const metadata = await alchemy.core.getTokenMetadata(
           tokenBalance.contractAddress
@@ -294,22 +287,52 @@ async function getTokens(address, setTokenBalances, setTotalCount) {
   }
 }
 
-async function getTokensByContract(address, contractAddress, setTokenBalances) {
-  console.log(
-    "getting tokens for owner",
-    address,
-    "and contract",
-    contractAddress
-  );
+// implement
+async function getTokensByContract(
+  address,
+  contractAddress,
+  setTokenBalances,
+  setLoading
+) {
+  try {
+    const data = await alchemy.core.getTokenBalances(address, [
+      contractAddress,
+    ]);
+    console.log("token for address data", data);
+    /*
+    if (data) {
+      // Remove tokens with zero balance
+      const nonZeroBalances = data.tokenBalances.filter((token) => {
+        return parseInt(token.tokenBalance) != "0";
+      });
+      for (const tokenBalance of nonZeroBalances) {
+        const metadata = await alchemy.core.getTokenMetadata(
+          tokenBalance.contractAddress
+        );
+        let token = {};
+        token.address = tokenBalance.contractAddress;
+        token.balance = parseInt(tokenBalance.tokenBalance);
+        if (metadata) {
+          token.logo = metadata.logo;
+          token.name = metadata.name;
+          token.decimals = metadata.decimals;
+          token.symbol = metadata.symbol;
+        }
+        tokens.push(token);
+      }
+    }
+    console.log("tokens", tokens);
+    setTokenBalances(tokens);*/
+  } catch (e) {
+    handleError(e);
+  }
 }
 
 async function getNfts(address, setNfts, setTotalCount) {
-  console.log("looking up nts for address", address);
   try {
     let data = await alchemy.nft.getNftsForOwner(address, {
       excludeFilters: ["SPAM"],
     });
-    console.log("nfts", data);
     let nfts = [];
     if (data) {
       setTotalCount(data.totalCount);
@@ -334,9 +357,11 @@ async function getNftsByContract(
   address,
   contractAddress,
   setNfts,
-  setTotalCount
+  setTotalCount,
+  setLoading
 ) {
   try {
+    setLoading(true);
     let data = await alchemy.nft.getNftsForOwner(address, {
       contractAddresses: [contractAddress],
     });
@@ -355,12 +380,17 @@ async function getNftsByContract(
       }
     }
     setNfts(nfts);
+    setLoading(false);
   } catch (e) {
-    handleError(e);
+    handleError(e, setLoading);
   }
 }
 
-function handleError(e) {
+function handleError(e, setLoading) {
+  if (setLoading) {
+    setLoading(false);
+  }
+  // if server error don't log / only alert server error
   console.error(e);
   alert(e);
 }

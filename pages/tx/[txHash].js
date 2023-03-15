@@ -8,6 +8,7 @@ import { getTransactionDetails } from "@/scripts/alchemyApi.js";
 const Transaction = () => {
   const router = useRouter();
   const { txHash } = router.query;
+  const dynamicRoute = useRouter().asPath;
 
   const [blockNumber, setBlockNumber] = useState();
   const [index, setIndex] = useState();
@@ -29,6 +30,29 @@ const Transaction = () => {
   const [s, setS] = useState();
   const [v, setV] = useState();
   const [type, setType] = useState();
+
+  // reset state on route change
+  useEffect(() => {
+    setBlockNumber();
+    setIndex();
+    setConfirmations();
+    setSender();
+    setRecipient();
+    setValue();
+    setData();
+    setCreates();
+    setBaseFee();
+    setGasPrice();
+    setGasLimit();
+    setGasUsed();
+    setMaxFeePerGas();
+    setMaxPriorityFeePerGas();
+    setNonce();
+    setR();
+    setS();
+    setV();
+    setType();
+  }, [dynamicRoute]);
 
   useEffect(() => {
     if (txHash) {
@@ -56,7 +80,6 @@ const Transaction = () => {
         setV,
         setType
       );
-
       // if not a valid txHash, redirect to block page to determine if a blockHash
       if (result == false) {
         router.replace(`/block/${txHash}`);
